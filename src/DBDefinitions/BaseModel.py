@@ -33,6 +33,7 @@ def UUIDColumn(**kwargs):
 # je-li treba, muzete definovat modely obsahujici jen id polozku, na ktere se budete odkazovat
 #
 
+#důležité, bude všude
 IDType = uuid.UUID
 
 import dataclasses
