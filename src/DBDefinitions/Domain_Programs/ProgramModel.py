@@ -20,20 +20,37 @@ from src.DBDefinitions.BaseModel import BaseDBModel, UUIDColumn, UUIDFKey, IDTyp
 ###########################################################################################################################
 
 class ProgramModel(BaseDBModel):
-    __tablename__ = "event_invitations"
+    __tablename__ = "programs"
 
-    id: Mapped[IDType] = mapped_column(primary_key=True, default=None, nullable=True)
-    
-    event_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("events.id"), default=None, nullable=True, comment="Event assigned to the invitation")
-    user_id: Mapped[Optional[IDType]] = UUIDFKey(ForeignKey("users.id"), default=None, nullable=True, comment="User assigned to the invitation")
-    state_id: Mapped[Optional[IDType]] = UUIDFKey(ForeignKey("states.id"), default=None, nullable=True, comment="State assigned to the invitation")
-    
-    # Relationships: viewonly indicates that these relationships are loaded via foreign keys.
-    event = relationship(
-        "EventModel",
-        primaryjoin="ProgramModel.event_id==EventModel.id",
-        uselist=False,
-        viewonly=True
+    provider_id: Mapped[IDType] = UUIDFKey(nullable=False)
+
+    name: Mapped[str] = mapped_column(
+        nullable=False,
+    )
+
+    label: Mapped[str] = mapped_column(
+        nullable=False,
+    )
+
+    description: Mapped[str] = mapped_column(
+        nullable=True,
+        default=None,
+    )
+
+    website: Mapped[str] = mapped_column(
+        nullable=True,
+        default=None,
+    )
+
+    provider = relationship(
+        "ProviderModel",
+        viewonly=True,
+    )
+
+    calls = relationship(
+        "CallModel",
+        back_populates="program",
+        viewonly=True,
     )
 
 
