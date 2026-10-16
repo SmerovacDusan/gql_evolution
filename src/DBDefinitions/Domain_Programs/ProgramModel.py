@@ -22,22 +22,27 @@ from src.DBDefinitions.BaseModel import BaseDBModel, UUIDColumn, UUIDFKey, IDTyp
 class ProgramModel(BaseDBModel):
     __tablename__ = "programs"
 
-    provider_id: Mapped[IDType] = UUIDFKey(nullable=False)
+    provider_id: Mapped[IDType] = UUIDFKey(
+        ForeignKeyArg=ForeignKey("providers.id"),
+        nullable=False,
+    )
 
     name: Mapped[str] = mapped_column(
         nullable=False,
+        default=None,
     )
 
     label: Mapped[str] = mapped_column(
         nullable=False,
+        default=None,
     )
 
-    description: Mapped[str] = mapped_column(
+    description: Mapped[str | None] = mapped_column(
         nullable=True,
         default=None,
     )
 
-    website: Mapped[str] = mapped_column(
+    website: Mapped[str | None] = mapped_column(
         nullable=True,
         default=None,
     )
