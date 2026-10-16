@@ -26,42 +26,45 @@ class CallModel(BaseDBModel):
         ForeignKey("programs.id"),
         nullable=False,
         index=True,
+        default=None,
     )
 
     name: Mapped[str] = mapped_column(
         nullable=False,
+        default=None,
     )
 
     label: Mapped[str] = mapped_column(
         nullable=False,
+        default=None,
     )
 
-    description: Mapped[str] = mapped_column(
+    description: Mapped[str | None] = mapped_column(
         nullable=True,
         default=None,
     )
 
-    announced: Mapped[datetime.datetime] = mapped_column(
+    announced: Mapped[datetime.datetime | None] = mapped_column(
         nullable=True,
         default=None,
     )
 
-    submission_start: Mapped[datetime.datetime] = mapped_column(
+    submission_start: Mapped[datetime.datetime | None] = mapped_column(
         nullable=True,
         default=None,
     )
 
-    submission_end: Mapped[datetime.datetime] = mapped_column(
+    submission_end: Mapped[datetime.datetime | None] = mapped_column(
         nullable=True,
         default=None,
     )
 
-    evaluation_end: Mapped[datetime.datetime] = mapped_column(
+    evaluation_end: Mapped[datetime.datetime | None] = mapped_column(
         nullable=True,
         default=None,
     )
 
-    website: Mapped[str] = mapped_column(
+    website: Mapped[str | None] = mapped_column(
         nullable=True,
         default=None,
     )
