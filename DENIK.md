@@ -2,7 +2,13 @@
 
 ## TODO
 - [x] Otestovat spuštění main.py - funguje
+- [ ] Testovací data
 - [ ] Zjistit roli uživatele
+
+## 25. 10. 2026
+
+### Změny
+- Fungující naplnění databáze pomocí systemdata.json a seed.py
 
 ## 16. 10. 2026
 
