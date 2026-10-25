@@ -73,6 +73,6 @@ __all__ = [
     'BaseDBModel', 'IDType', 'UUIDColumn', 'UUIDFKey',
     'EventModel', 'EventInvitationModel', 'EventTypeModel',
     'ProgramModel', 'CallModel',
-    'startEngine', 'ComposeConnectionString', 'EventTypeModel'
+    'startEngine', 'ComposeConnectionString'
 ]
 

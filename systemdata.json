@@ -1,9 +1,46 @@
 {
-    "eventtypes": [
+    "programs": [
+        {
+            "id": "cc898e2f-047a-4120-bd77-42266e5c7f2f",
+            "provider_id": "d580f2b5-f680-483e-9a0b-4d0ae469b476",
+            "name": "test_program",
+            "label": "Test program",
+            "description": "Program na podporu výzkumných projektů",
+            "website": "https://example.com/program"
+        },
+        {
+            "id": "bc6936a7-9b09-45cd-9102-09c86b66d655",
+            "provider_id": "d580f2b5-f680-483e-9a0b-4d0ae469b476",
+            "name": "test_program_2",
+            "label": "Test program 2",
+            "description": "Program na podporu výzkumných projektů 2",
+            "website": "https://example.com/program/2"
+        }
     ],
-    "events": [
-    ],
-    "event_invitations": [
+    "calls": [
+        {
+            "id": "28feb5a7-548c-4018-bacd-1c9276952037",
+            "program_id": "cc898e2f-047a-4120-bd77-42266e5c7f2f",
+            "name": "test_call",
+            "label": "Test call",
+            "description": "Call for research projects",
+            "announced": "2024-01-01T00:00:00+00:00",
+            "submission_start": "2024-02-01T00:00:00+00:00",
+            "submission_end": "2024-03-01T00:00:00+00:00",
+            "evaluation_end": "2024-04-01T00:00:00+00:00",
+            "website": "https://example.com/program/first-call"
+        },
+        {
+            "id": "5c19e28c-7431-49d4-9071-9cd7f47f8b0a",
+            "program_id": "bc6936a7-9b09-45cd-9102-09c86b66d655",
+            "name": "test_call_2",
+            "label": "Test call 2",
+            "description": "Call for research projects 2",
+            "announced": "2024-05-01T00:00:00+00:00",
+            "submission_start": "2024-06-01T00:00:00+00:00",
+            "submission_end": "2024-07-01T00:00:00+00:00",
+            "evaluation_end": "2026-08-01T00:00:00+00:00",
+            "website": "https://example.com/program/second-call"
+        }
     ]
-
 }

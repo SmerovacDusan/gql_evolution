@@ -26,6 +26,7 @@ class ProgramModel(BaseDBModel):
         ForeignKeyArg=ForeignKey("providers.id"),
         nullable=False,
     )
+    #provider = relationship("ProviderModel", viewonly=True, uselist=False)
 
     name: Mapped[str] = mapped_column(
         nullable=False,
@@ -47,14 +48,8 @@ class ProgramModel(BaseDBModel):
         default=None,
     )
 
-    provider = relationship(
-        "ProviderModel",
-        viewonly=True,
-    )
-
     calls = relationship(
         "CallModel",
-        back_populates="program",
         viewonly=True,
     )
 

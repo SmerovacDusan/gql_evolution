@@ -28,6 +28,10 @@ class CallModel(BaseDBModel):
         index=True,
         default=None,
     )
+    program = relationship(
+        "ProgramModel",
+        viewonly=True,
+    )
 
     name: Mapped[str] = mapped_column(
         nullable=False,
@@ -37,29 +41,35 @@ class CallModel(BaseDBModel):
     label: Mapped[str] = mapped_column(
         nullable=False,
         default=None,
+        comment="display name"
     )
 
     description: Mapped[str | None] = mapped_column(
         nullable=True,
         default=None,
+        comment="description of the call"
     )
 
     announced: Mapped[datetime.datetime | None] = mapped_column(
-        nullable=True,
-        default=None,
+    DateTime(timezone=False),
+    nullable=True,
+    default=None,
     )
 
     submission_start: Mapped[datetime.datetime | None] = mapped_column(
+        DateTime(timezone=False),
         nullable=True,
         default=None,
     )
 
     submission_end: Mapped[datetime.datetime | None] = mapped_column(
+        DateTime(timezone=False),
         nullable=True,
         default=None,
     )
 
     evaluation_end: Mapped[datetime.datetime | None] = mapped_column(
+        DateTime(timezone=False),
         nullable=True,
         default=None,
     )
@@ -69,11 +79,6 @@ class CallModel(BaseDBModel):
         default=None,
     )
 
-    program = relationship(
-        "ProgramModel",
-        back_populates="calls",
-        viewonly=True,
-    )
 
 
 #                         +-------------+
