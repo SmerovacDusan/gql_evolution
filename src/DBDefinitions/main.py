@@ -36,6 +36,8 @@ from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
 
 from uoishelpers.dataloaders import prepareSelect
 
+from src.DBDefinitions.seed import init_database_data
+
 from . import BaseDBModel, ComposeConnectionString, startEngine
 
 
@@ -598,6 +600,7 @@ async def run_async(args: argparse.Namespace) -> typing.Any:
     if session_maker is None:
         raise CliError("Unable to create async session maker")
 
+    await init_database_data(session_maker)
     async with session_maker() as session:
         operation = args.operation.lower()
 
