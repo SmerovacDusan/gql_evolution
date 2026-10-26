@@ -5,6 +5,11 @@
 - [ ] Testovací data
 - [ ] Zjistit roli uživatele
 
+## 26. 10. 2026
+
+### Změny
+- Přidání terminálových skriptů (Linux a Win) pro generování náhodných UUID
+
 ## 25. 10. 2026
 
 ### Změny
