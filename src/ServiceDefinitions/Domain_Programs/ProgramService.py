@@ -15,3 +15,9 @@ class ProgramService(BaseService[IDLoader[ProgramModel]]):
     @classmethod
     async def getLoader(cls, ctx: ServiceContext) -> IDLoader[ProgramModel]:
         return ctx.loaders.ProgramModel
+
+    @classmethod
+    async def GetByProvider(cls, ctx: ServiceContext, provider_id):
+        # vrátí všechny programy vybraného poskytovatele.
+        loader = await cls.getLoader(ctx)
+        return await loader.filter_by(provider_id=provider_id)
