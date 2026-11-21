@@ -253,6 +253,32 @@ def split_columns_and_relationships(
 
     return column_values, relationship_values
 
+# řešesní problému s timezone při převodu z ISO formátu na datetime objekt
+def convert_column_value(column, value):
+    if value is None:
+        return None
+
+    python_type = column.type.python_type
+
+    if python_type is datetime.datetime and isinstance(value, str):
+        result = datetime.datetime.fromisoformat(
+            value.replace("Z", "+00:00")
+        )
+
+        if result.tzinfo is not None:
+            result = result.astimezone(
+                datetime.timezone.utc
+            ).replace(tzinfo=None)
+
+        return result
+
+    if python_type is datetime.date and isinstance(value, str):
+        return datetime.date.fromisoformat(value)
+
+    if python_type is datetime.time and isinstance(value, str):
+        return datetime.time.fromisoformat(value)
+
+    return value
 
 def build_instance(model_cls: type, payload: JsonDict) -> typing.Any:
     """
@@ -276,6 +302,16 @@ def build_instance(model_cls: type, payload: JsonDict) -> typing.Any:
         model_cls,
         payload,
     )
+    
+    # Převede hodnoty sloupců na správný typ podle SQLAlchemy modelu.
+    mapper = inspect(model_cls)
+    for column in mapper.columns:
+        if column.key in column_values:
+            column_values[column.key] = convert_column_value(
+                column,
+                column_values[column.key]
+            )
+
 
     instance = model_cls(**column_values)
 
@@ -411,8 +447,17 @@ def get_primary_key_value(model_cls: type, payload: JsonDict) -> typing.Any:
         raise CliError(
             f"Missing primary key '{primary_key_name}' in payload"
         )
+    
+    # Získá hodnotu primárního klíče z payloadu a převede ji na správný typ podle SQLAlchemy modelu.
+    value = payload[primary_key_name]
 
-    return payload[primary_key_name]
+    mapper = sqlalchemy.inspect(model_cls)
+    primary_key_column = mapper.primary_key[0]
+
+    if isinstance(primary_key_column.type, sqlalchemy.Uuid):
+        return uuid.UUID(str(value))
+
+    return value
 
 
 def parse_include(payload: JsonDict) -> set[str]:
@@ -550,7 +595,22 @@ async def op_update(
     if not isinstance(entity_payload, dict):
         raise CliError("'entity' must be an object")
 
-    get_primary_key_value(model_cls, entity_payload)
+    # Pokud je v payloadu uveden primární klíč, použije se k načtení existující entity z DB.
+    # Pokud existující entita není nalezena, vyhodí se chyba.
+    primary_key_value = get_primary_key_value(
+        model_cls,
+        entity_payload,
+    )
+    
+    loader = await service_cls.getLoader(ctx)
+    existing_entity = await loader.load(primary_key_value)
+
+    if existing_entity is None:
+        raise CliError("Entity not found")
+
+    if hasattr(existing_entity, "lastchange"):
+        if "lastchange" not in entity_payload:
+            entity_payload["lastchange"] = existing_entity.lastchange
 
     entity = build_instance(model_cls, entity_payload)
 
@@ -558,6 +618,13 @@ async def op_update(
         ctx=ctx,
         entity=entity,
     )
+
+    # Pokud je výsledek None, znamená to, že aktualizace selhala kvůli konfliktu (např. entita byla změněna nebo lastchange je zastaralý).
+    if result is None:
+        raise CliError(
+            "Update failed: entity was changed or lastchange is outdated"
+        )
+
 
     return serialize_instance(result)
 
@@ -680,39 +747,50 @@ async def run_async(args: argparse.Namespace) -> typing.Any:
 
     if session_maker is None:
         raise CliError("Unable to create async session maker")
-
+    
+    # díky try: a rollbacku se změny se uloží až po dokončení operace a při chybě se vrátí zpět 
     async with session_maker() as session:
-        loaders = LoaderMap(session)
+        try:
+            loaders = LoaderMap(session)
 
-        ctx = ServiceContext(
-            loaders=loaders,
-            user=parse_user(args.user, payload),
-            request=None,
-        )
+            ctx = ServiceContext(
+                loaders=loaders,
+                user=parse_user(args.user, payload),
+                request=None,
+            )
 
-        operation = args.operation.lower()
+            operation = args.operation.lower()
 
-        if operation in {"create", "c"}:
-            return await op_create(ctx, service_cls, payload)
+            if operation in {"create", "c"}:
+                result = await op_create(ctx, service_cls, payload)
 
-        if operation in {"get", "read", "r", "single"}:
-            return await op_get(ctx, service_cls, payload)
+            elif operation in {"get", "read", "r", "single"}:
+                result = await op_get(ctx, service_cls, payload)
 
-        if operation in {"list", "multi", "rmulti", "page"}:
-            return await op_list(ctx, service_cls, payload)
+            elif operation in {"list", "multi", "rmulti", "page"}:
+                result = await op_list(ctx, service_cls, payload)
 
-        if operation in {"update", "u"}:
-            return await op_update(ctx, service_cls, payload)
+            elif operation in {"update", "u"}:
+                result = await op_update(ctx, service_cls, payload)
 
-        if operation in {"delete", "d", "remove"}:
-            return await op_delete(ctx, service_cls, payload)
+            elif operation in {"delete", "d", "remove"}:
+                result = await op_delete(ctx, service_cls, payload)
 
-        return await op_call_service_method(
-            ctx=ctx,
-            service_cls=service_cls,
-            operation=args.operation,
-            payload=payload,
-        )
+            else:
+                result = await op_call_service_method(
+                    ctx=ctx,
+                    service_cls=service_cls,
+                    operation=args.operation,
+                    payload=payload,
+                )
+
+            await session.commit()
+            return result
+
+        except Exception:
+            await session.rollback()
+            raise
+
 
 
 def create_arg_parser() -> argparse.ArgumentParser:

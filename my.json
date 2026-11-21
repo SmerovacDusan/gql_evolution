@@ -1,0 +1,8 @@
+{
+    "id": "01a1fd83-56bc-7878-8d97-b6a6d84a743e",
+    "provider_id": "d580f2b5-f680-483e-9a0b-4d0ae469b476",
+    "name": "test_service_3",
+    "label": "Test service 3",
+    "description": "Ukázka funkčnosti my.json souboru",
+    "website": "https://example.com/program"
+}
