@@ -90,10 +90,38 @@ class BaseService(typing.Generic[T]):
         loader = await cls.getLoader(ctx)
         return await loader.page(skip=skip, limit=limit, where=where, orderby=orderby, desc=desc, extendedfilter=extendedfilter)
 
+    #Po úpravě zůstanounezmíněné existující hodnoty zachovány. Pouze pokud je hodnota uvedena jako None, bude přepsána na None.
     @classmethod
     async def Update(cls, ctx, entity, extraValues=None) -> typing.Any:
         extraValues = extraValues or {}
         loader = await cls.getLoader(ctx)
+
+        db_model = getattr(loader, "dbModel", None)
+        session = getattr(loader, "session", None)
+        if (
+            db_model is not None
+            and session is not None
+            and isinstance(entity, db_model)
+        ):
+            current_entity = await session.get(db_model, entity.id)
+            if current_entity is None:
+                return None
+
+            for column in sqlalchemy.inspect(db_model).column_attrs:
+                field_name = column.key
+                if field_name in {"id", "lastchange"}:
+                    continue
+
+                if (
+                    getattr(entity, field_name, None) is None
+                    and getattr(current_entity, field_name, None) is not None
+                ):
+                    setattr(
+                        entity,
+                        field_name,
+                        getattr(current_entity, field_name),
+                    )
+
         return await loader.update(entity=entity, extraValues=extraValues)
 
     @classmethod
